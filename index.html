@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cover Letter Agent</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 13px; background: #f8f9fb; color: #1a1a2e;
+      min-height: 100vh;
+    }
+    .app { display: flex; flex-direction: column; min-height: 100vh; max-width: 1100px; margin: 0 auto; }
+
+    /* Header */
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #fff; border-bottom: 1px solid #e8eaf0; flex-shrink: 0; position: sticky; top: 0; z-index: 100; }
+    .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; color: #1a1a2e; }
+    .settings-btn { background: none; border: none; cursor: pointer; color: #6b7280; padding: 4px; border-radius: 6px; display: flex; transition: background 0.15s; }
+    .settings-btn:hover { background: #f1f3f7; color: #1a1a2e; }
+
+    /* Panel */
+    .panel { background: #fff; border-bottom: 1px solid #e8eaf0; padding: 14px; overflow-y: auto; }
+    .settings-divider { height: 1px; background: #f0f2f6; margin: 12px 0; }
+
+    /* Tabs */
+    .tabs { display: flex; flex-direction: column; flex: 1; }
+    .tab-bar { display: flex; background: #fff; border-bottom: 1px solid #e8eaf0; padding: 0 14px; overflow-x: auto; }
+    .tab { background: none; border: none; border-bottom: 2px solid transparent; padding: 9px 14px; font-size: 12.5px; font-weight: 500; color: #6b7280; cursor: pointer; white-space: nowrap; transition: color 0.15s, border-color 0.15s; font-family: inherit; }
+    .tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+    .tab-pane { display: none; padding: 14px; flex: 1; overflow-y: auto; }
+    .tab-pane.active { display: block; }
+
+    /* Form fields */
+    .section { margin-bottom: 10px; }
+    .field-label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+    .field-label .muted { font-weight: 400; color: #9ca3af; }
+    .field-input { width: 100%; height: 34px; padding: 0 10px; border: 1px solid #e2e5ec; border-radius: 7px; font-size: 13px; color: #1a1a2e; background: #fff; outline: none; transition: border 0.15s; font-family: inherit; }
+    .field-input:focus { border-color: #2563eb; }
+    .field-textarea { width: 100%; padding: 8px 10px; border: 1px solid #e2e5ec; border-radius: 7px; font-size: 12.5px; color: #1a1a2e; background: #fff; outline: none; resize: vertical; font-family: inherit; line-height: 1.6; min-height: 80px; transition: border 0.15s; }
+    .field-textarea:focus { border-color: #2563eb; }
+    .hint { font-size: 11px; color: #9ca3af; margin-top: 3px; line-height: 1.5; }
+    .hint a { color: #2563eb; }
+
+    /* Vars grid */
+    .collapsible-section { margin-bottom: 10px; }
+    .collapsible-toggle { background: none; border: none; cursor: pointer; font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 5px; padding: 4px 0; font-family: inherit; }
+    .collapsible-toggle:hover { color: #1a1a2e; }
+    .var-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .var-row { display: flex; align-items: center; gap: 8px; }
+    .var-label { font-size: 11px; font-weight: 600; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 5px; padding: 3px 7px; min-width: 82px; text-align: center; flex-shrink: 0; font-family: 'Courier New', monospace; }
+
+    /* Mode toggle */
+    .mode-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
+    .mode-btn { display: flex; align-items: center; gap: 5px; padding: 7px 14px; border: 1.5px solid #e2e5ec; border-radius: 8px; background: #fff; font-size: 12px; font-weight: 500; color: #6b7280; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+    .mode-btn.active { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
+
+    /* Buttons */
+    .btn-primary { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 9px 14px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; font-family: inherit; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-primary:disabled { opacity: 0.6; cursor: default; }
+    .btn-secondary { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 14px; background: #fff; color: #374151; border: 1.5px solid #e2e5ec; border-radius: 8px; font-size: 12.5px; font-weight: 500; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+    .btn-secondary:hover { border-color: #2563eb; color: #2563eb; }
+    .btn-research { margin-top: 10px; }
+    .btn-test { padding: 4px 10px; font-size: 11px; font-weight: 500; border-radius: 5px; border: 1px solid #2563eb; color: #2563eb; background: #eff6ff; cursor: pointer; white-space: nowrap; transition: background 0.15s; font-family: inherit; }
+    .btn-test:hover { background: #dbeafe; }
+    .btn-test:disabled { opacity: 0.5; cursor: default; }
+    .btn-row { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-row .btn-secondary { flex: 0 0 auto; }
+    .btn-row .btn-primary { flex: 1; }
+
+    /* Status */
+    .status-msg { margin-top: 7px; font-size: 12px; min-height: 16px; line-height: 1.5; }
+    .status-msg.success { color: #16a34a; }
+    .status-msg.error   { color: #dc2626; }
+    .status-msg.loading { color: #2563eb; }
+    .research-log { margin-top: 8px; background: #f8f9fb; border: 1px solid #e2e5ec; border-radius: 7px; padding: 8px 10px; font-size: 11px; color: #6b7280; line-height: 1.6; }
+
+    /* Toolbar */
+    .toolbar { display: flex; align-items: center; gap: 2px; padding: 5px 8px; background: #f8f9fb; border: 1px solid #e2e5ec; border-radius: 7px 7px 0 0; }
+    .tb-btn { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: none; border: none; border-radius: 4px; cursor: pointer; color: #374151; font-size: 12px; transition: background 0.12s; }
+    .tb-btn:hover { background: #e8eaf0; }
+    .tb-divider { width: 1px; height: 14px; background: #e2e5ec; margin: 0 2px; }
+    .link-bar { display: flex; align-items: center; gap: 6px; padding: 5px 8px; background: #eff6ff; border: 1px solid #bfdbfe; border-top: none; }
+    .link-input { flex: 1; height: 26px; padding: 0 8px; border: 1px solid #bfdbfe; border-radius: 5px; font-size: 12px; outline: none; font-family: inherit; }
+    .link-ok, .link-cancel { padding: 3px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; border: none; font-family: inherit; }
+    .link-ok { background: #2563eb; color: #fff; }
+    .link-cancel { background: #fff; color: #6b7280; border: 1px solid #e2e5ec; }
+
+    /* Rich editor */
+    .field-rich-editor { width: 100%; min-height: 200px; max-height: 340px; padding: 9px 10px; border: 1px solid #e2e5ec; border-radius: 0 0 7px 7px; border-top: none; font-size: 12.5px; color: #1a1a2e; background: #fff; outline: none; overflow-y: auto; font-family: inherit; line-height: 1.65; word-break: break-word; }
+
+    /* OAuth info */
+    .oauth-info { background: #f8f9fb; border: 1px solid #e8eaf0; border-radius: 7px; padding: 10px; margin-top: 6px; }
+    .oauth-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
+    .oauth-lbl { color: #6b7280; min-width: 90px; font-weight: 500; }
+    .inline-code { font-family: 'Courier New', monospace; font-size: 11px; background: #f0f2f6; padding: 2px 6px; border-radius: 4px; color: #1a1a2e; word-break: break-all; }
+
+    /* Dual panels */
+    .dual-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: #fff; border-bottom: 1px solid #e8eaf0; flex-shrink: 0; }
+    .dual-panel-tabs { display: flex; gap: 20px; }
+    .dual-label { font-size: 12px; font-weight: 600; }
+    .your-label { color: #374151; }
+    .ai-label { color: #7c3aed; }
+    .icon-btn { display: flex; align-items: center; gap: 5px; background: none; border: none; cursor: pointer; font-size: 12px; color: #6b7280; padding: 4px 8px; border-radius: 6px; font-family: inherit; }
+    .icon-btn:hover { background: #f1f3f7; color: #1a1a2e; }
+
+    .dual-panels { display: flex; flex: 1; gap: 0; overflow: hidden; }
+    @media (max-width: 700px) { .dual-panels { flex-direction: column; } }
+    .dual-pane { display: flex; flex-direction: column; flex: 1; overflow: hidden; padding: 12px; min-width: 0; }
+    .panel-divider { width: 1px; background: #e8eaf0; flex-shrink: 0; }
+
+    /* Email meta */
+    .email-meta { background: #f8f9fb; border: 1px solid #e2e5ec; border-radius: 8px; margin-bottom: 8px; overflow: hidden; flex-shrink: 0; }
+    .email-row { display: flex; align-items: center; padding: 0 10px; min-height: 32px; }
+    .email-lbl { font-size: 11px; font-weight: 600; color: #9ca3af; min-width: 52px; }
+    .email-input { flex: 1; border: none; background: none; font-size: 12.5px; color: #1a1a2e; outline: none; font-family: inherit; }
+    .email-sep { height: 1px; background: #f0f2f6; margin: 0 10px; }
+
+    /* Letter editor */
+    .letter-editor {
+      flex: 1; outline: none; font-size: 12.5px; color: #1a1a2e; line-height: 1.65;
+      overflow-y: auto; overflow-x: hidden; word-break: break-word;
+      border: 1px solid #e2e5ec; border-radius: 7px; background: #fff; padding: 10px;
+      margin-bottom: 6px; min-height: 460px;
+    }
+    .letter-editor p { margin: 0 0 6px; }
+    .letter-editor ul, .letter-editor ol { padding-left: 18px; margin: 4px 0; }
+    .letter-editor li { margin: 2px 0; }
+    .letter-editor a { color: #2563eb; text-decoration: underline; }
+    .letter-editor b, .letter-editor strong { font-weight: 600; }
+
+    /* AI pane */
+    .ai-pane-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-shrink: 0; }
+    .ai-badge { background: #7c3aed; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+    .ai-pane-title { font-size: 12px; font-weight: 600; color: #374151; flex: 1; }
+    .copy-to-left-btn { font-size: 11px; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 5px; padding: 3px 9px; cursor: pointer; white-space: nowrap; font-family: inherit; }
+    .copy-to-left-btn:hover { background: #dbeafe; }
+    .research-summary { font-size: 11px; color: #6b7280; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px; padding: 7px 10px; margin-bottom: 8px; line-height: 1.5; flex-shrink: 0; }
+    .ai-letter-output { font-size: 12px; color: #374151; line-height: 1.7; overflow-y: auto; flex: 1; padding: 0 2px; min-height: 460px; }
+    .ai-letter-output p { margin: 0 0 8px; }
+
+    /* PDF preview */
+    .pdf-preview { border: 1px solid #e2e5ec; border-radius: 8px; padding: 20px 28px; font-family: 'Times New Roman', Times, serif; font-size: 11pt; line-height: 1.5; color: #111; background: #fff; outline: none; overflow-y: auto; margin-bottom: 8px; flex: 1; min-height: 460px; word-break: break-word; }
+    .pdf-preview p { margin: 0 0 8pt; }
+    .pdf-preview ul, .pdf-preview ol { padding-left: 22pt; margin: 4pt 0 8pt; }
+    .pdf-preview li { margin: 2pt 0; }
+    .pdf-preview a { color: #000; text-decoration: none; }
+    .pdf-preview b, .pdf-preview strong { font-weight: 700; }
+    .pdf-preview .pdf-header { margin-bottom: 14pt; }
+    .pdf-preview .pdf-name { font-size: 13pt; font-weight: 700; margin: 0 0 2pt !important; line-height: 1.3; }
+    .pdf-preview .pdf-contact { font-size: 9.5pt; color: #222; margin: 0 !important; line-height: 1.45; }
+
+    /* Attachments */
+    .attach-section { border: 1px solid #e2e5ec; border-radius: 8px; overflow: hidden; margin-bottom: 8px; flex-shrink: 0; }
+    .attach-header { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: #f8f9fb; border-bottom: 1px solid #e2e5ec; }
+    .attach-label { font-size: 11.5px; font-weight: 600; color: #374151; flex: 1; }
+    .attach-upload-btn { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #2563eb; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 5px; padding: 3px 8px; cursor: pointer; font-family: inherit; }
+    .attach-upload-btn:hover { background: #dbeafe; }
+    .attach-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 7px 10px; min-height: 32px; align-items: center; }
+    .attach-no-docs { font-size: 11px; color: #9ca3af; }
+    .send-doc-chip { display: flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; border: 1px solid; cursor: default; }
+    .send-doc-chip.attached { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+    .send-doc-chip.detached { background: #f9fafb; border-color: #e5e7eb; color: #6b7280; }
+    .chip-toggle { background: none; border: none; cursor: pointer; font-size: 11px; color: inherit; padding: 0 2px; opacity: 0.6; transition: opacity 0.12s; line-height: 1; }
+    .chip-toggle:hover { opacity: 1; }
+    .chip-remove { background: none; border: none; cursor: pointer; font-size: 13px; line-height: 1; padding: 0 2px; color: #9ca3af; border-left: 1px solid currentColor; margin-left: 2px; opacity: 0.5; transition: all 0.12s; }
+    .chip-remove:hover { color: #dc2626; opacity: 1; }
+
+    /* Documents */
+    .upload-zone { display: flex; flex-direction: column; align-items: center; gap: 5px; border: 1.5px dashed #d1d5db; border-radius: 10px; padding: 18px; cursor: pointer; transition: all 0.15s; color: #6b7280; font-size: 12.5px; margin-bottom: 10px; }
+    .upload-zone:hover { border-color: #2563eb; color: #2563eb; background: #f8faff; }
+    .upload-sub { font-size: 11px; color: #9ca3af; }
+    .docs-list { display: flex; flex-direction: column; gap: 6px; }
+    .doc-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #fff; border: 1px solid #e2e5ec; border-radius: 8px; }
+    .doc-item.is-default { border-color: #bfdbfe; background: #f8faff; }
+    .doc-icon { color: #6b7280; flex-shrink: 0; }
+    .doc-info { flex: 1; min-width: 0; }
+    .doc-name { font-size: 12.5px; font-weight: 500; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .doc-meta { font-size: 11px; color: #9ca3af; margin-top: 1px; }
+    .doc-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .doc-default-btn { font-size: 11px; padding: 3px 8px; border-radius: 5px; border: 1px solid #e2e5ec; background: #fff; cursor: pointer; color: #6b7280; font-family: inherit; }
+    .doc-default-btn:hover { border-color: #2563eb; color: #2563eb; }
+    .doc-del-btn { background: none; border: none; cursor: pointer; color: #d1d5db; font-size: 15px; line-height: 1; padding: 0 2px; transition: color 0.12s; }
+    .doc-del-btn:hover { color: #dc2626; }
+
+    /* Gmail note */
+    .gmail-note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #92400e; line-height: 1.5; margin-bottom: 10px; }
+    .gmail-note a { color: #2563eb; }
+
+    /* Print styles */
+    @media print {
+      .header, .dual-panel-header, .btn-row, .attach-section, .body-toolbar, .email-meta { display: none !important; }
+      .dual-panels { display: block; }
+      .ai-pane { display: none !important; }
+      .letter-editor, .pdf-preview { min-height: unset; border: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <rect x="2" y="2" width="16" height="16" rx="4" fill="#2563EB"/>
+        <path d="M5.5 7h9M5.5 10h6M5.5 13h7.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span>Cover Letter Agent</span>
+    </div>
+    <button class="settings-btn" id="settingsToggle" title="Settings">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M2.93 2.93l1.41 1.41M11.66 11.66l1.41 1.41M2.93 13.07l1.41-1.41M11.66 4.34l1.41-1.41" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- Settings panel -->
+  <div class="panel" id="settingsPanel" style="display:none">
+    <label class="field-label">Groq API Key <span class="muted">(free at console.groq.com)</span></label>
+    <input type="password" id="groqApiKey" class="field-input" placeholder="gsk_..." />
+
+    <label class="field-label" style="margin-top:10px">Serper API Key <span class="muted">(free at serper.dev — for company research)</span></label>
+    <input type="password" id="serperApiKey" class="field-input" placeholder="serper key..." />
+    <div style="display:flex;align-items:center;gap:8px;margin-top:5px">
+      <button class="btn-test" id="testSerperBtn">Test key</button>
+      <span class="status-msg" id="serperTestStatus" style="margin:0;font-size:11px"></span>
+    </div>
+    <p class="hint">Free 2,500 searches/month at <a href="https://serper.dev" target="_blank">serper.dev</a></p>
+
+    <div class="settings-divider"></div>
+
+    <div class="gmail-note">
+      <strong>📧 Gmail sending</strong> — In the web app, Gmail send uses OAuth redirect flow. You need a Google Cloud OAuth Client ID with this page's URL as an authorised redirect URI. <a href="https://console.cloud.google.com" target="_blank">Set up here</a>.
+    </div>
+    <label class="field-label">Gmail OAuth Client ID</label>
+    <input type="text" id="gmailClientId" class="field-input" placeholder="xxxxxx.apps.googleusercontent.com" />
+    <p class="hint">Add <code class="inline-code" id="redirectUriDisplay">—</code> as an authorised redirect URI in Google Cloud Console. <span style="cursor:pointer;color:#2563eb" id="copyRedirectUri">Copy</span></p>
+
+    <div class="settings-divider"></div>
+    <label class="field-label">Default email subject</label>
+    <input type="text" id="subjectTpl" class="field-input" placeholder="Application for {position} — {senderName}" />
+    <p class="hint">Variables: <code class="inline-code">{position}</code> <code class="inline-code">{company}</code> <code class="inline-code">{senderName}</code></p>
+
+    <button class="btn-primary" id="saveSettings" style="margin-top:12px">Save settings</button>
+    <div class="status-msg" id="settingsStatus"></div>
+  </div>
+
+  <!-- Main tabs -->
+  <div class="tabs" id="mainContent">
+    <div class="tab-bar">
+      <button class="tab active" data-tab="compose">Compose</button>
+      <button class="tab" data-tab="email-tpl">Email Template</button>
+      <button class="tab" data-tab="pdf-tpl">PDF Template</button>
+      <button class="tab" data-tab="docs">Documents</button>
+    </div>
+
+    <!-- Compose tab -->
+    <div class="tab-pane active" id="tab-compose">
+      <div class="section">
+        <label class="field-label">{company} <span class="muted">— company name</span></label>
+        <input type="text" id="v_company" class="field-input" placeholder="e.g. Spotify" />
+      </div>
+      <div class="section">
+        <label class="field-label">{position} <span class="muted">— job title</span></label>
+        <input type="text" id="v_position" class="field-input" placeholder="e.g. Flutter Developer" />
+      </div>
+      <div class="section">
+        <label class="field-label">Job description / requirements <span class="muted">(paste key parts)</span></label>
+        <textarea id="jobDesc" class="field-textarea" placeholder="Paste the job description or key requirements here…"></textarea>
+      </div>
+      <div class="collapsible-section">
+        <button class="collapsible-toggle" id="moreVarsToggle">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          More variables
+        </button>
+        <div id="moreVarsContent" style="display:none">
+          <div class="var-grid">
+            <div class="var-row"><label class="var-label">{senderName}</label><input type="text" id="v_senderName" class="field-input" placeholder="Your full name" /></div>
+            <div class="var-row"><label class="var-label">{email}</label><input type="text" id="v_email" class="field-input" placeholder="your@email.com" /></div>
+            <div class="var-row"><label class="var-label">{phone}</label><input type="text" id="v_phone" class="field-input" placeholder="+1..." /></div>
+            <div class="var-row"><label class="var-label">{custom1}</label><input type="text" id="v_custom1" class="field-input" placeholder="Any extra variable" /></div>
+          </div>
+        </div>
+      </div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="email">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="3" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 4.5l5.5 3.5 5.5-3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Send Email
+        </button>
+        <button class="mode-btn" data-mode="pdf">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="2" y="1" width="9" height="11" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4.5h5M4 6.5h5M4 8.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Generate PDF
+        </button>
+      </div>
+      <button class="btn-primary btn-research" id="goBtn">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M9 9l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span id="goBtnLabel">Research &amp; Preview Email</span>
+      </button>
+      <div class="status-msg" id="composeStatus"></div>
+      <div class="research-log" id="researchLog" style="display:none"></div>
+    </div>
+
+    <!-- Email Template tab -->
+    <div class="tab-pane" id="tab-email-tpl">
+      <p class="hint" style="margin-bottom:8px">Used when sending emails. Supports <code class="inline-code">{company}</code> <code class="inline-code">{position}</code> <code class="inline-code">{senderName}</code> <code class="inline-code">{email}</code> <code class="inline-code">{phone}</code> <code class="inline-code">{custom1}</code></p>
+      <div class="toolbar tpl-toolbar" id="emailTplToolbar">
+        <button class="tb-btn" data-cmd="bold"><b>B</b></button>
+        <button class="tb-btn" data-cmd="italic"><i>I</i></button>
+        <button class="tb-btn" data-cmd="underline"><u>U</u></button>
+        <div class="tb-divider"></div>
+        <button class="tb-btn" data-cmd="insertUnorderedList"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="2" cy="3.5" r="1.2" fill="currentColor"/><circle cx="2" cy="6.5" r="1.2" fill="currentColor"/><circle cx="2" cy="9.5" r="1.2" fill="currentColor"/><path d="M5 3.5h7M5 6.5h7M5 9.5h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        <div class="tb-divider"></div>
+        <button class="tb-btn" data-cmd="link"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        <button class="tb-btn" data-cmd="unlink"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="2 1.5"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="2 1.5"/><path d="M2 2l9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+      </div>
+      <div id="emailTplLinkBar" class="link-bar" style="display:none"><input type="url" id="emailTplLinkUrl" class="link-input" placeholder="https://example.com" /><button class="link-ok">Apply</button><button class="link-cancel">✕</button></div>
+      <div id="emailTemplate" class="field-rich-editor" contenteditable="true" spellcheck="true"></div>
+      <button class="btn-primary" id="saveEmailTpl" style="margin-top:8px">Save email template</button>
+      <div class="status-msg" id="emailTplStatus"></div>
+    </div>
+
+    <!-- PDF Template tab -->
+    <div class="tab-pane" id="tab-pdf-tpl">
+      <p class="hint" style="margin-bottom:8px">Used for PDF generation. Same <code class="inline-code">{placeholders}</code>.</p>
+      <div class="toolbar tpl-toolbar" id="pdfTplToolbar">
+        <button class="tb-btn" data-cmd="bold"><b>B</b></button>
+        <button class="tb-btn" data-cmd="italic"><i>I</i></button>
+        <button class="tb-btn" data-cmd="underline"><u>U</u></button>
+        <div class="tb-divider"></div>
+        <button class="tb-btn" data-cmd="insertUnorderedList"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="2" cy="3.5" r="1.2" fill="currentColor"/><circle cx="2" cy="6.5" r="1.2" fill="currentColor"/><circle cx="2" cy="9.5" r="1.2" fill="currentColor"/><path d="M5 3.5h7M5 6.5h7M5 9.5h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        <div class="tb-divider"></div>
+        <button class="tb-btn" data-cmd="link"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        <button class="tb-btn" data-cmd="unlink"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="2 1.5"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="2 1.5"/><path d="M2 2l9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+      </div>
+      <div id="pdfTplLinkBar" class="link-bar" style="display:none"><input type="url" id="pdfTplLinkUrl" class="link-input" placeholder="https://example.com" /><button class="link-ok">Apply</button><button class="link-cancel">✕</button></div>
+      <div id="pdfTemplate" class="field-rich-editor" contenteditable="true" spellcheck="true"></div>
+      <button class="btn-primary" id="savePdfTpl" style="margin-top:8px">Save PDF template</button>
+      <div class="status-msg" id="pdfTplStatus"></div>
+    </div>
+
+    <!-- Documents tab -->
+    <div class="tab-pane" id="tab-docs">
+      <p class="hint" style="margin:0 0 10px">Saved documents auto-attached to emails. Star one as default.</p>
+      <label class="upload-zone" for="docsFileInput">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v11M7 6l4-3 4 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16v1a2 2 0 002 2h12a2 2 0 002-2v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>Click to upload PDF, DOC, DOCX</span>
+        <span class="upload-sub">max 5 MB per file</span>
+      </label>
+      <input type="file" id="docsFileInput" accept=".pdf,.doc,.docx" multiple style="display:none" />
+      <div id="docsList" class="docs-list"></div>
+      <div class="status-msg" id="docsStatus"></div>
+    </div>
+  </div>
+
+  <!-- Email result panel -->
+  <div id="emailResultPanel" style="display:none; flex-direction:column; flex:1">
+    <div class="dual-panel-header">
+      <button class="icon-btn" id="emailBackBtn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 9L4.5 6l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Back
+      </button>
+      <div class="dual-panel-tabs">
+        <span class="dual-label your-label">✎ Your letter <span style="font-weight:400;color:#9ca3af">(editable)</span></span>
+        <span class="dual-label ai-label">✦ AI suggestion</span>
+      </div>
+    </div>
+    <div class="dual-panels">
+      <div class="dual-pane your-pane">
+        <div class="email-meta">
+          <div class="email-row"><span class="email-lbl">To</span><input type="email" id="toEmail" class="email-input" placeholder="recruiter@company.com" /></div>
+          <div class="email-sep"></div>
+          <div class="email-row"><span class="email-lbl">Subject</span><input type="text" id="emailSubject" class="email-input" /></div>
+          <div class="email-sep"></div>
+          <div class="email-row"><span class="email-lbl">From</span><input type="text" id="senderName" class="email-input" placeholder="Your full name" /></div>
+          <div class="email-sep"></div>
+        </div>
+        <div class="toolbar body-toolbar">
+          <button class="tb-btn" data-cmd="bold"><b>B</b></button>
+          <button class="tb-btn" data-cmd="italic"><i>I</i></button>
+          <button class="tb-btn" data-cmd="underline"><u>U</u></button>
+          <div class="tb-divider"></div>
+          <button class="tb-btn" data-cmd="insertUnorderedList"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="2" cy="3.5" r="1.2" fill="currentColor"/><circle cx="2" cy="6.5" r="1.2" fill="currentColor"/><circle cx="2" cy="9.5" r="1.2" fill="currentColor"/><path d="M5 3.5h7M5 6.5h7M5 9.5h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+          <div class="tb-divider"></div>
+          <button class="tb-btn" id="bodyLinkBtn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        </div>
+        <div id="bodyLinkBar" class="link-bar" style="display:none"><input type="url" id="bodyLinkUrl" class="link-input" placeholder="https://example.com" /><button class="link-ok" id="bodyLinkOk">Apply</button><button class="link-cancel" id="bodyLinkCancel">✕</button></div>
+        <div id="emailLetterOutput" class="letter-editor" contenteditable="true" spellcheck="true"></div>
+        <div class="attach-section">
+          <div class="attach-header">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="color:#9ca3af;flex-shrink:0"><path d="M12.25 6.5l-5.5 5.5a3.25 3.25 0 01-4.6-4.6l5.5-5.5a2 2 0 012.83 2.83L4.96 10.2a.75.75 0 01-1.06-1.06l5.5-5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="attach-label">Attachments</span>
+            <label class="attach-upload-btn">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1.5v6M3.5 4L6 1.5 8.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.5 9.5h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Upload
+              <input type="file" id="previewAttachInput" accept=".pdf,.doc,.docx" multiple style="display:none" />
+            </label>
+          </div>
+          <div class="attach-chips" id="sendAttachContent">
+            <span id="attachNoDocs" class="attach-no-docs">No attachments — upload a file or add from Documents tab</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-secondary" id="emailCopyBtn">Copy</button>
+          <button class="btn-primary" id="sendBtn">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0"><path d="M11.5 1.5L1 5.5l4 1.5L6.5 11l5-9.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            Send via Gmail
+          </button>
+        </div>
+        <div class="status-msg" id="sendStatus"></div>
+      </div>
+      <div class="panel-divider"></div>
+      <div class="dual-pane ai-pane">
+        <div class="ai-pane-header">
+          <div class="ai-badge">✦ AI</div>
+          <span class="ai-pane-title">Researched &amp; tailored</span>
+          <button class="copy-to-left-btn" id="copyAiToLeft">← Use this</button>
+        </div>
+        <div class="research-summary" id="researchSummary"></div>
+        <div id="aiLetterOutput" class="ai-letter-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF result panel -->
+  <div id="pdfResultPanel" style="display:none; flex-direction:column; flex:1">
+    <div class="dual-panel-header">
+      <button class="icon-btn" id="pdfBackBtn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M7.5 9L4.5 6l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Back
+      </button>
+      <div class="dual-panel-tabs">
+        <span class="dual-label your-label">✎ Your letter <span style="font-weight:400;color:#9ca3af">(editable)</span></span>
+        <span class="dual-label ai-label">✦ AI suggestion</span>
+      </div>
+    </div>
+    <div class="dual-panels">
+      <div class="dual-pane your-pane">
+        <div id="pdfPreview" class="pdf-preview" contenteditable="true" spellcheck="true"></div>
+        <div class="attach-section">
+          <div class="attach-header">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="color:#9ca3af;flex-shrink:0"><path d="M12.25 6.5l-5.5 5.5a3.25 3.25 0 01-4.6-4.6l5.5-5.5a2 2 0 012.83 2.83L4.96 10.2a.75.75 0 01-1.06-1.06l5.5-5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="attach-label">Attachments <span style="font-weight:400;color:#9ca3af">(included in PDF bundle)</span></span>
+            <label class="attach-upload-btn">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1.5v6M3.5 4L6 1.5 8.5 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.5 9.5h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Upload
+              <input type="file" id="pdfPreviewAttachInput" accept=".pdf,.doc,.docx" multiple style="display:none" />
+            </label>
+          </div>
+          <div class="attach-chips" id="pdfSendAttachContent">
+            <span id="pdfAttachNoDocs" class="attach-no-docs">No attachments</span>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-secondary" id="pdfCopyBtn">Copy</button>
+          <button class="btn-primary" id="pdfDownloadBtn">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" style="flex-shrink:0"><path d="M6.5 1.5v7M3.5 6l3 2.5L10 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.5 10.5h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Download PDF
+          </button>
+        </div>
+        <div class="status-msg" id="pdfStatus"></div>
+      </div>
+      <div class="panel-divider"></div>
+      <div class="dual-pane ai-pane">
+        <div class="ai-pane-header">
+          <div class="ai-badge">✦ AI</div>
+          <span class="ai-pane-title">Researched &amp; tailored</span>
+          <button class="copy-to-left-btn" id="copyAiToPdf">← Use this</button>
+        </div>
+        <div class="research-summary" id="researchSummaryPdf"></div>
+        <div id="aiLetterOutputPdf" class="ai-letter-output"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+// ── State ─────────────────────────────────────────────────────────────
+let selectedDocIds  = new Set();
+let pdfSelectedDocIds = new Set();
+let currentMode     = 'email';
+let savedSelections = {};
+
+// ── Default templates ──────────────────────────────────────────────────
+const DEFAULT_EMAIL_TEMPLATE = `<p>Dear Hiring Manager,</p>
+<p>I am writing to express my interest in the {position} position at {company}. With my background in [your field/skills], I am confident I can contribute meaningfully to your team.</p>
+<p>[Describe your relevant experience, key achievements, and how they relate to this role. Mention specific projects or results that demonstrate your skills.]</p>
+<p>[Explain why you are interested in {company} specifically — reference their products, values, or mission that resonates with you.]</p>
+<p>I am available to discuss how I can add value to your team at your convenience. Please find my CV attached for more details.</p>
+<p>Thank you for your time and consideration. I look forward to hearing from you.</p>
+<p>Warm regards,<br>{senderName}</p>`;
+
+const DEFAULT_PDF_TEMPLATE = `<div class="pdf-header">
+<p class="pdf-name">{senderName}</p>
+<p class="pdf-contact">Email: {email} &nbsp;&nbsp; Phone: {phone}</p>
+<p class="pdf-contact">Location: {custom1}</p>
+</div>
+<p>Dear Hiring Manager,</p>
+<p>I am writing to express my interest in the {position} position at {company}. With my background in [your field/skills], I am confident I can contribute meaningfully to your team.</p>
+<p>[Describe your relevant experience, key achievements, and how they relate to this role. Mention specific projects or results that demonstrate your skills.]</p>
+<p>[Explain why you are interested in {company} specifically — reference their products, values, or mission that resonates with you.]</p>
+<p>I am available to discuss how I can add value to your team at your convenience. Please find my CV attached for more details.</p>
+<p>Thank you for your time and consideration. I look forward to hearing from you.</p>
+<p>Warm regards,<br>{senderName}</p>`;
+
+// ── Storage — uses localStorage instead of chrome.storage ─────────────
+function getStorage(keys) {
+  const result = {};
+  keys.forEach(k => {
+    const v = localStorage.getItem('cla_' + k);
+    if (v !== null) {
+      try { result[k] = JSON.parse(v); } catch { result[k] = v; }
+    }
+  });
+  return Promise.resolve(result);
+}
+function setStorage(obj) {
+  Object.entries(obj).forEach(([k, v]) => {
+    localStorage.setItem('cla_' + k, typeof v === 'string' ? JSON.stringify(v) : JSON.stringify(v));
+  });
+  return Promise.resolve();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────
+function setStatus(id, msg, type = '') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'status-msg ' + type;
+}
+function readFileAsBase64(file) {
+  return new Promise((res, rej) => {
+    const rd = new FileReader();
+    rd.onload  = () => res(rd.result.split(',')[1]);
+    rd.onerror = rej;
+    rd.readAsDataURL(file);
+  });
+}
+function guessMime(f) {
+  const e = (f||'').split('.').pop().toLowerCase();
+  return {pdf:'application/pdf',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}[e]||'application/octet-stream';
+}
+function formatBytes(b) {
+  return b<1024?b+' B':b<1048576?(b/1024).toFixed(0)+' KB':(b/1048576).toFixed(1)+' MB';
+}
+function applyVars(html, vars) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const it  = document.createNodeIterator(doc.body, NodeFilter.SHOW_TEXT);
+  let n;
+  while ((n = it.nextNode())) {
+    let t = n.textContent;
+    Object.entries(vars).forEach(([k,v]) => { if (v) t = t.split(`{${k}}`).join(v); });
+    n.textContent = t;
+  }
+  return doc.body.innerHTML;
+}
+function applyVarsStr(str, vars) {
+  let r = str;
+  Object.entries(vars).forEach(([k,v]) => { if (v) r = r.split(`{${k}}`).join(v); });
+  return r;
+}
+function getVars() {
+  return {
+    company:    document.getElementById('v_company').value.trim(),
+    position:   document.getElementById('v_position').value.trim(),
+    senderName: document.getElementById('v_senderName').value.trim() || '',
+    email:      document.getElementById('v_email').value.trim(),
+    phone:      document.getElementById('v_phone').value.trim(),
+    custom1:    document.getElementById('v_custom1').value.trim(),
+  };
+}
+function plainTextToHtml(text) {
+  const esc = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return esc.split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g,'<br>')}</p>`).join('');
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Mode toggle ───────────────────────────────────────────────────────
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode = btn.dataset.mode;
+    document.getElementById('goBtnLabel').textContent =
+      currentMode === 'email' ? 'Research & Preview Email' : 'Research & Preview PDF';
+  });
+});
+
+// ── Collapsible vars ──────────────────────────────────────────────────
+document.getElementById('moreVarsToggle').addEventListener('click', () => {
+  const c = document.getElementById('moreVarsContent');
+  c.style.display = c.style.display !== 'none' ? 'none' : 'block';
+});
+
+// ── Settings toggle ───────────────────────────────────────────────────
+document.getElementById('settingsToggle').addEventListener('click', () => {
+  const panel = document.getElementById('settingsPanel');
+  const main  = document.getElementById('mainContent');
+  const open  = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  if (!open) {
+    main.style.display = 'none';
+    document.getElementById('emailResultPanel').style.display = 'none';
+    document.getElementById('pdfResultPanel').style.display   = 'none';
+  } else {
+    main.style.display = 'flex';
+  }
+});
+
+// ── Redirect URI display ──────────────────────────────────────────────
+(function() {
+  const uri = window.location.origin + window.location.pathname;
+  const el  = document.getElementById('redirectUriDisplay');
+  if (el) el.textContent = uri;
+  document.getElementById('copyRedirectUri')?.addEventListener('click', () => {
+    navigator.clipboard.writeText(uri).then(() => {
+      document.getElementById('copyRedirectUri').textContent = 'Copied!';
+      setTimeout(() => document.getElementById('copyRedirectUri').textContent = 'Copy', 1500);
+    });
+  });
+})();
+
+// ── Load saved data ───────────────────────────────────────────────────
+(async () => {
+  const data = await getStorage([
+    'groqApiKey','serperApiKey','gmailClientId','subjectTpl','senderName',
+    'emailTemplate','pdfTemplate',
+    'v_company','v_position','v_senderName','v_email','v_phone','v_custom1','jobDesc'
+  ]);
+  if (data.groqApiKey)    document.getElementById('groqApiKey').value    = data.groqApiKey;
+  if (data.serperApiKey)  document.getElementById('serperApiKey').value  = data.serperApiKey;
+  if (data.gmailClientId) document.getElementById('gmailClientId').value = data.gmailClientId;
+  if (data.senderName)    document.getElementById('senderName').value    = data.senderName;
+  document.getElementById('subjectTpl').value = data.subjectTpl || 'Application for {position} — {senderName}';
+  ['company','position','senderName','email','phone','custom1'].forEach(k => {
+    const el = document.getElementById('v_' + k);
+    if (el && data['v_' + k]) el.value = data['v_' + k];
+  });
+  if (data.jobDesc) document.getElementById('jobDesc').value = data.jobDesc;
+  document.getElementById('emailTemplate').innerHTML = data.emailTemplate || DEFAULT_EMAIL_TEMPLATE;
+  document.getElementById('pdfTemplate').innerHTML   = data.pdfTemplate   || DEFAULT_PDF_TEMPLATE;
+  renderDocsList();
+})();
+
+// ── Serper test button ────────────────────────────────────────────────
+document.getElementById('testSerperBtn').addEventListener('click', async () => {
+  const key = document.getElementById('serperApiKey').value.trim();
+  const statusEl = document.getElementById('serperTestStatus');
+  if (!key) { statusEl.textContent = 'Enter a key first.'; statusEl.className = 'status-msg error'; return; }
+  statusEl.textContent = 'Testing…'; statusEl.className = 'status-msg loading';
+  try {
+    const res = await fetch('https://google.serper.dev/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-API-KEY': key },
+      body: JSON.stringify({ q: 'test', num: 1 })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+    const credits = data.credits !== undefined ? ` · ${data.credits} credits left` : '';
+    statusEl.textContent = '✓ Key works!' + credits;
+    statusEl.className = 'status-msg success';
+  } catch(e) {
+    statusEl.textContent = '✗ ' + e.message;
+    statusEl.className = 'status-msg error';
+  }
+  setTimeout(() => { statusEl.textContent = ''; statusEl.className = 'status-msg'; }, 5000);
+});
+
+// ── Save settings ─────────────────────────────────────────────────────
+document.getElementById('saveSettings').addEventListener('click', async () => {
+  const groqApiKey    = document.getElementById('groqApiKey').value.trim();
+  const serperApiKey  = document.getElementById('serperApiKey').value.trim();
+  const gmailClientId = document.getElementById('gmailClientId').value.trim();
+  const subjectTpl    = document.getElementById('subjectTpl').value.trim() || 'Application for {position} — {senderName}';
+  await setStorage({ groqApiKey, serperApiKey, gmailClientId, subjectTpl, gmailToken: '', gmailTokenExp: 0 });
+  setStatus('settingsStatus','Settings saved!','success');
+  setTimeout(() => {
+    document.getElementById('settingsPanel').style.display = 'none';
+    document.getElementById('mainContent').style.display   = 'flex';
+    setStatus('settingsStatus','');
+  }, 1200);
+});
+
+// ── Save templates ────────────────────────────────────────────────────
+document.getElementById('saveEmailTpl').addEventListener('click', async () => {
+  const html = document.getElementById('emailTemplate').innerHTML.trim();
+  if (!document.getElementById('emailTemplate').innerText.trim()) { setStatus('emailTplStatus','Template is empty.','error'); return; }
+  await setStorage({ emailTemplate: html });
+  setStatus('emailTplStatus','Email template saved!','success');
+  setTimeout(() => setStatus('emailTplStatus',''), 1500);
+});
+document.getElementById('savePdfTpl').addEventListener('click', async () => {
+  const html = document.getElementById('pdfTemplate').innerHTML.trim();
+  if (!document.getElementById('pdfTemplate').innerText.trim()) { setStatus('pdfTplStatus','Template is empty.','error'); return; }
+  await setStorage({ pdfTemplate: html });
+  setStatus('pdfTplStatus','PDF template saved!','success');
+  setTimeout(() => setStatus('pdfTplStatus',''), 1500);
+});
+
+// ── Groq API ──────────────────────────────────────────────────────────
+async function callGroq(apiKey, model, userMsg, systemMsg = '') {
+  const messages = [];
+  if (systemMsg) messages.push({ role: 'system', content: systemMsg });
+  messages.push({ role: 'user', content: userMsg });
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${apiKey}` },
+    body: JSON.stringify({ model, max_tokens: 1200, messages })
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || `Groq ${res.status}`); }
+  const d = await res.json();
+  return d.choices?.[0]?.message?.content || '';
+}
+
+// ── MAIN: Research & Generate ─────────────────────────────────────────
+document.getElementById('goBtn').addEventListener('click', async () => {
+  const vars    = getVars();
+  const jobDesc = document.getElementById('jobDesc').value.trim();
+  if (!vars.company)  { setStatus('composeStatus','Please enter the company name.','error'); return; }
+  if (!vars.position) { setStatus('composeStatus','Please enter the job title.','error'); return; }
+
+  const data = await getStorage(['groqApiKey','serperApiKey','emailTemplate','pdfTemplate','subjectTpl','senderName']);
+  if (!data.groqApiKey) { setStatus('composeStatus','Add your Groq API key in Settings ⚙','error'); return; }
+
+  await setStorage({
+    v_company:vars.company, v_position:vars.position, v_senderName:vars.senderName,
+    v_email:vars.email, v_phone:vars.phone, v_custom1:vars.custom1,
+    jobDesc, senderName: vars.senderName
+  });
+
+  const btn = document.getElementById('goBtn');
+  btn.disabled = true;
+  const log = document.getElementById('researchLog');
+  log.style.display = 'block';
+
+  function logStep(msg) { log.textContent = msg; setStatus('composeStatus', msg, 'loading'); }
+
+  try {
+    // Step 1: Research
+    logStep('🔍 Researching ' + vars.company + '…');
+    let researchContext = '';
+    if (data.serperApiKey) {
+      const queries = [
+        `${vars.company} company products technology stack`,
+        `${vars.company} ${vars.position} culture values`,
+      ];
+      const snippets = [];
+      for (const q of queries) {
+        try {
+          const sr = await fetch('https://google.serper.dev/search', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json', 'X-API-KEY': data.serperApiKey },
+            body: JSON.stringify({ q, num: 5 })
+          });
+          if (sr.ok) {
+            const sd = await sr.json();
+            (sd.organic || []).slice(0,4).forEach(r => snippets.push(`${r.title}: ${r.snippet}`));
+          }
+        } catch {}
+      }
+      researchContext = snippets.join('\n');
+      logStep(`✓ Found ${snippets.length} research snippets about ${vars.company}`);
+    } else {
+      logStep('ℹ No Serper key — generating without live research');
+      await new Promise(r => setTimeout(r, 400));
+    }
+
+    // Step 2: Generate
+    logStep('✦ Generating tailored cover letter with AI…');
+    const baseEmailHtml = data.emailTemplate || DEFAULT_EMAIL_TEMPLATE;
+    const basePdfHtml   = data.pdfTemplate   || DEFAULT_PDF_TEMPLATE;
+    const activeTemplateHtml = currentMode === 'email' ? baseEmailHtml : basePdfHtml;
+    const templateDoc  = new DOMParser().parseFromString(activeTemplateHtml, 'text/html');
+    const templateText = templateDoc.body.innerText || templateDoc.body.textContent || '';
+
+    const systemPrompt = `You are an expert cover letter writer. You write highly personalized, genuine motivation letters that show real interest in the specific company based on research. Your letters are professional, warm, and concise. Never use generic phrases. Always reference specific things about the company.`;
+    const userPrompt = `Rewrite and tailor the following cover letter template for a specific job application.
+
+APPLICANT:
+- Name: ${vars.senderName}
+- Email: ${vars.email || 'not provided'}
+- Phone: ${vars.phone || 'not provided'}
+- Additional info: ${vars.custom1 || 'not provided'}
+
+COMPANY: ${vars.company}
+ROLE: ${vars.position}
+JOB DESCRIPTION: ${jobDesc || 'Not provided'}
+
+COMPANY RESEARCH FINDINGS:
+${researchContext || 'No live research available — use general knowledge about ' + vars.company}
+
+BASE TEMPLATE (use this as the foundation — keep the applicant's real background, tone, and structure, but tailor it to the specific company and role):
+${templateText}
+
+INSTRUCTIONS:
+- Keep the applicant's actual background, skills, and experience from the template — do not invent or replace them
+- Tailor the letter to ${vars.company} and the ${vars.position} role specifically
+- Replace any [placeholder] sections with relevant content based on the job description and research
+- Reference specific things about ${vars.company} from the research findings
+- Keep the same overall length and tone as the template
+- End with "Warm regards,\n${vars.senderName}"
+- Return ONLY the letter text, no preamble or explanation`;
+
+    const aiLetter = await callGroq(data.groqApiKey, 'llama-3.3-70b-versatile', userPrompt, systemPrompt);
+
+    // Step 3: Fill template
+    const filledEmail = applyVars(baseEmailHtml, vars);
+    const filledPdf   = applyVars(basePdfHtml, vars);
+    const aiHtml      = plainTextToHtml(aiLetter);
+    const summaryText = researchContext
+      ? `<strong>Researched:</strong> ${vars.company} — ${researchContext.slice(0,180)}…`
+      : data.serperApiKey
+        ? `<strong>Note:</strong> Serper returned no results for "${vars.company}" — generated from general knowledge.`
+        : `<strong>Note:</strong> Add a free Serper API key in Settings for live company research.`;
+
+    if (currentMode === 'email') {
+      document.getElementById('emailLetterOutput').innerHTML = filledEmail;
+      const subjectTpl = data.subjectTpl || 'Application for {position} — {senderName}';
+      document.getElementById('emailSubject').value = applyVarsStr(subjectTpl, vars);
+      document.getElementById('senderName').value   = vars.senderName;
+      document.getElementById('aiLetterOutput').innerHTML  = aiHtml;
+      document.getElementById('researchSummary').innerHTML = summaryText;
+      document.getElementById('mainContent').style.display      = 'none';
+      document.getElementById('emailResultPanel').style.display = 'flex';
+      selectedDocIds = new Set();
+      await renderSendAttachChips();
+    } else {
+      document.getElementById('pdfPreview').innerHTML         = filledPdf;
+      document.getElementById('aiLetterOutputPdf').innerHTML  = aiHtml;
+      document.getElementById('researchSummaryPdf').innerHTML = summaryText;
+      document.getElementById('mainContent').style.display    = 'none';
+      document.getElementById('pdfResultPanel').style.display = 'flex';
+      pdfSelectedDocIds = new Set();
+      await renderPdfAttachChips();
+    }
+    log.style.display = 'none';
+    setStatus('composeStatus','');
+  } catch(e) {
+    setStatus('composeStatus','Error: ' + e.message, 'error');
+    log.style.display = 'none';
+  }
+  btn.disabled = false;
+});
+
+// ── Back buttons ──────────────────────────────────────────────────────
+document.getElementById('emailBackBtn').addEventListener('click', () => {
+  document.getElementById('emailResultPanel').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'flex';
+});
+document.getElementById('pdfBackBtn').addEventListener('click', () => {
+  document.getElementById('pdfResultPanel').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'flex';
+});
+
+// ── Copy AI → editor ──────────────────────────────────────────────────
+document.getElementById('copyAiToLeft').addEventListener('click', () => {
+  if (confirm('Replace your letter with the AI version?'))
+    document.getElementById('emailLetterOutput').innerHTML = document.getElementById('aiLetterOutput').innerHTML;
+});
+document.getElementById('copyAiToPdf').addEventListener('click', () => {
+  if (confirm('Replace your PDF letter with the AI version?'))
+    document.getElementById('pdfPreview').innerHTML = document.getElementById('aiLetterOutputPdf').innerHTML;
+});
+
+// ── Copy buttons ──────────────────────────────────────────────────────
+document.getElementById('emailCopyBtn').addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('emailLetterOutput').innerText).then(() => {
+    document.getElementById('emailCopyBtn').textContent = 'Copied!';
+    setTimeout(() => document.getElementById('emailCopyBtn').textContent = 'Copy', 1500);
+  });
+});
+document.getElementById('pdfCopyBtn').addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('pdfPreview').innerText).then(() => {
+    document.getElementById('pdfCopyBtn').textContent = 'Copied!';
+    setTimeout(() => document.getElementById('pdfCopyBtn').textContent = 'Copy', 1500);
+  });
+});
+
+// ── PDF Download — opens print window ────────────────────────────────
+document.getElementById('pdfDownloadBtn').addEventListener('click', () => {
+  const content = document.getElementById('pdfPreview').innerHTML;
+  const vars    = getVars();
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cover Letter</title>
+<style>
+@page { size: A4; margin: 25mm 25mm 20mm 25mm; }
+* { box-sizing: border-box; }
+body { font-family: 'Calibri','Trebuchet MS',Arial,sans-serif; font-size: 11pt; line-height: 1.5; color: #000; margin: 0; padding: 32px 48px; }
+p { margin: 0 0 8pt; } ul,ol { padding-left: 22pt; margin: 4pt 0 8pt; } li { margin: 2pt 0; }
+a { color: #000; text-decoration: none; } b,strong { font-weight: 700; }
+.pdf-header { margin-bottom: 14pt; }
+.pdf-name { font-size: 13pt; font-weight: 700; margin: 0 0 2pt !important; line-height: 1.3; }
+.pdf-contact { font-size: 9.5pt; color: #222; margin: 0 !important; line-height: 1.45; }
+.print-bar { position: fixed; top: 0; left: 0; right: 0; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; font-family: -apple-system,sans-serif; font-size: 13px; z-index: 9999; }
+.print-btn { background: #fff; color: #1d4ed8; border: none; border-radius: 6px; padding: 7px 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.content { margin-top: 52px; }
+@media print { .print-bar { display: none !important; } .content { margin-top: 0 !important; } }
+</style></head><body>
+<div class="print-bar"><span>✦ Ready — click Save as PDF or use Ctrl+P</span><button class="print-btn" onclick="window.print()">Save as PDF</button></div>
+<div class="content">${content}</div>
+</body></html>`);
+  win.document.close();
+  setStatus('pdfStatus','Print window opened — click "Save as PDF"','success');
+  setTimeout(() => setStatus('pdfStatus',''), 5000);
+});
+
+// ── Rich text toolbars ────────────────────────────────────────────────
+function setupToolbar(editorId, toolbarEl, linkBarId, linkUrlId) {
+  const editor = document.getElementById(editorId);
+  toolbarEl.querySelectorAll('.tb-btn[data-cmd]').forEach(btn => {
+    btn.addEventListener('mousedown', e => {
+      e.preventDefault();
+      const cmd = btn.dataset.cmd;
+      if (cmd === 'link') {
+        saveEditorSel(editorId);
+        const existing = window.getSelection()?.anchorNode?.parentElement?.closest('a')?.href || '';
+        document.getElementById(linkUrlId).value = existing;
+        document.getElementById(linkBarId).style.display = 'flex';
+        document.getElementById(linkUrlId).focus();
+        return;
+      }
+      if (cmd === 'unlink') { editor.focus(); document.execCommand('unlink',false,null); return; }
+      editor.focus();
+      document.execCommand(cmd, false, null);
+    });
+  });
+  const bar = document.getElementById(linkBarId);
+  const applyBtn  = bar.querySelector('.link-ok');
+  const cancelBtn = bar.querySelector('.link-cancel');
+  applyBtn?.addEventListener('click', () => {
+    const url = document.getElementById(linkUrlId).value.trim();
+    if (!url) { closeLinkBar(linkBarId, linkUrlId, editorId); return; }
+    restoreEditorSel(editorId);
+    document.execCommand('createLink', false, url.startsWith('http') ? url : 'https://' + url);
+    const a = window.getSelection()?.anchorNode?.parentElement?.closest('a');
+    if (a) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+    closeLinkBar(linkBarId, linkUrlId, editorId);
+  });
+  cancelBtn?.addEventListener('click', () => { restoreEditorSel(editorId); closeLinkBar(linkBarId, linkUrlId, editorId); });
+  document.getElementById(linkUrlId)?.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); applyBtn?.click(); }
+    if (e.key === 'Escape') { restoreEditorSel(editorId); closeLinkBar(linkBarId, linkUrlId, editorId); }
+  });
+  ['mouseup','keyup'].forEach(ev => editor.addEventListener(ev, () => saveEditorSel(editorId)));
+}
+
+function saveEditorSel(id)    { const sel = window.getSelection(); if (sel && sel.rangeCount) savedSelections[id] = sel.getRangeAt(0).cloneRange(); }
+function restoreEditorSel(id) { const r = savedSelections[id]; if (!r) return; const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+function closeLinkBar(barId, urlId, editorId) { document.getElementById(barId).style.display='none'; document.getElementById(urlId).value=''; document.getElementById(editorId).focus(); }
+
+setupToolbar('emailTemplate', document.getElementById('emailTplToolbar'), 'emailTplLinkBar', 'emailTplLinkUrl');
+setupToolbar('pdfTemplate',   document.getElementById('pdfTplToolbar'),   'pdfTplLinkBar',   'pdfTplLinkUrl');
+
+// Body toolbar
+document.querySelectorAll('.body-toolbar .tb-btn[data-cmd]').forEach(btn => {
+  btn.addEventListener('mousedown', e => {
+    e.preventDefault();
+    document.getElementById('emailLetterOutput').focus();
+    document.execCommand(btn.dataset.cmd, false, null);
+  });
+});
+['mouseup','keyup'].forEach(ev =>
+  document.getElementById('emailLetterOutput').addEventListener(ev, () => saveEditorSel('emailLetterOutput')));
+
+document.getElementById('bodyLinkBtn').addEventListener('mousedown', e => {
+  e.preventDefault(); saveEditorSel('emailLetterOutput');
+  const existing = window.getSelection()?.anchorNode?.parentElement?.closest('a')?.href || '';
+  document.getElementById('bodyLinkUrl').value = existing;
+  document.getElementById('bodyLinkBar').style.display = 'flex';
+  document.getElementById('bodyLinkUrl').focus();
+});
+document.getElementById('bodyLinkOk').addEventListener('click', () => {
+  const url = document.getElementById('bodyLinkUrl').value.trim();
+  if (!url) { closeLinkBar('bodyLinkBar','bodyLinkUrl','emailLetterOutput'); return; }
+  restoreEditorSel('emailLetterOutput');
+  document.execCommand('createLink', false, url.startsWith('http') ? url : 'https://' + url);
+  const a = window.getSelection()?.anchorNode?.parentElement?.closest('a');
+  if (a) { a.target='_blank'; a.rel='noopener noreferrer'; }
+  closeLinkBar('bodyLinkBar','bodyLinkUrl','emailLetterOutput');
+});
+document.getElementById('bodyLinkCancel').addEventListener('click', () => { restoreEditorSel('emailLetterOutput'); closeLinkBar('bodyLinkBar','bodyLinkUrl','emailLetterOutput'); });
+document.getElementById('bodyLinkUrl').addEventListener('keydown', e => {
+  if (e.key==='Enter')  { e.preventDefault(); document.getElementById('bodyLinkOk').click(); }
+  if (e.key==='Escape') { restoreEditorSel('emailLetterOutput'); closeLinkBar('bodyLinkBar','bodyLinkUrl','emailLetterOutput'); }
+});
+
+// ── Documents library ─────────────────────────────────────────────────
+async function getDocs() { const d = await getStorage(['docs']); return d.docs || []; }
+async function saveDocs(docs) { await setStorage({ docs }); }
+function fileIconSvg() {
+  return `<svg class="doc-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="10" height="13" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 5h7M4.5 8h5M4.5 11h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`;
+}
+async function renderDocsList() {
+  const docs = await getDocs();
+  const list = document.getElementById('docsList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!docs.length) { list.innerHTML='<p style="font-size:12px;color:#9ca3af;text-align:center;padding:10px 0">No documents yet — upload your CV above</p>'; return; }
+  docs.forEach(doc => {
+    const item = document.createElement('div');
+    item.className = 'doc-item' + (doc.isDefault?' is-default':'');
+    item.dataset.id = doc.id;
+    item.innerHTML = `${fileIconSvg()}<div class="doc-info"><div class="doc-name" title="${doc.name}">${doc.name}</div><div class="doc-meta">${formatBytes(doc.size)}${doc.isDefault?' · <strong style="color:#2563eb">Default CV</strong>':''}</div></div><div class="doc-actions"><button class="doc-default-btn" data-id="${doc.id}">${doc.isDefault?'✓ Default':'Set default'}</button><button class="doc-del-btn" data-id="${doc.id}" title="Delete">×</button></div>`;
+    list.appendChild(item);
+  });
+  list.querySelectorAll('.doc-default-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const docs = await getDocs(); docs.forEach(d => { d.isDefault = d.id===btn.dataset.id; });
+      await saveDocs(docs); await renderDocsList(); await renderSendAttachChips();
+      setStatus('docsStatus','Default CV updated!','success'); setTimeout(()=>setStatus('docsStatus',''),1500);
+    });
+  });
+  list.querySelectorAll('.doc-del-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      let docs=await getDocs(); docs=docs.filter(d=>d.id!==btn.dataset.id);
+      await saveDocs(docs); await renderDocsList(); await renderSendAttachChips();
+    });
+  });
+}
+document.getElementById('docsFileInput').addEventListener('change', async e => {
+  const files = Array.from(e.target.files);
+  for (const file of files) {
+    if (file.size > 5*1024*1024) { setStatus('docsStatus',`${file.name} too large.`,'error'); continue; }
+    const b64 = await readFileAsBase64(file); const docs = await getDocs(); const first = !docs.length;
+    docs.push({ id:Date.now()+'_'+Math.random().toString(36).slice(2), name:file.name, mime:file.type||guessMime(file.name), b64, size:file.size, isDefault:first, addedAt:new Date().toISOString() });
+    await saveDocs(docs); setStatus('docsStatus',`${file.name} saved${first?' (default)':''}!`,'success'); setTimeout(()=>setStatus('docsStatus',''),2000);
+  }
+  e.target.value=''; await renderDocsList(); await renderSendAttachChips();
+});
+
+// ── Attach chips (email) ──────────────────────────────────────────────
+async function renderSendAttachChips() {
+  const docs = await getDocs();
+  const content = document.getElementById('sendAttachContent');
+  const noDocs  = document.getElementById('attachNoDocs');
+  if (!content) return;
+  Array.from(content.children).forEach(c => { if (c !== noDocs) c.remove(); });
+  if (!docs.length) { noDocs.style.display='inline'; selectedDocIds.clear(); return; }
+  noDocs.style.display = 'none';
+  if (!selectedDocIds.size) { const def = docs.find(d=>d.isDefault); if (def) selectedDocIds.add(def.id); }
+  docs.forEach(doc => {
+    const attached = selectedDocIds.has(doc.id);
+    const chip = document.createElement('div');
+    chip.className = 'send-doc-chip ' + (attached?'attached':'detached');
+    const icon = `<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="0.5" width="9" height="10" rx="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M3 4h5M3 6.5h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>`;
+    chip.innerHTML = `${icon}<span class="chip-name" style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}</span>${doc.isDefault?'<span style="font-size:10px;opacity:0.6">★</span>':''}<button class="chip-toggle">${attached?'✓':'+'}</button><button class="chip-remove">×</button>`;
+    chip.querySelector('.chip-toggle').addEventListener('click', e => { e.stopPropagation(); if(selectedDocIds.has(doc.id))selectedDocIds.delete(doc.id);else selectedDocIds.add(doc.id); renderSendAttachChips(); });
+    chip.querySelector('.chip-remove').addEventListener('click', async e => { e.stopPropagation(); if(!confirm(`Remove "${doc.name}"?`))return; let docs=await getDocs(); docs=docs.filter(d=>d.id!==doc.id); selectedDocIds.delete(doc.id); await saveDocs(docs); await renderDocsList(); await renderSendAttachChips(); });
+    content.appendChild(chip);
+  });
+}
+
+// ── Attach chips (PDF) ────────────────────────────────────────────────
+async function renderPdfAttachChips() {
+  const docs = await getDocs();
+  const content = document.getElementById('pdfSendAttachContent');
+  const noDocs  = document.getElementById('pdfAttachNoDocs');
+  if (!content) return;
+  Array.from(content.children).forEach(c => { if (c !== noDocs) c.remove(); });
+  if (!docs.length) { noDocs.style.display='inline'; pdfSelectedDocIds.clear(); return; }
+  noDocs.style.display = 'none';
+  docs.forEach(doc => {
+    const attached = pdfSelectedDocIds.has(doc.id);
+    const chip = document.createElement('div');
+    chip.className = 'send-doc-chip ' + (attached?'attached':'detached');
+    const icon = `<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="0.5" width="9" height="10" rx="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M3 4h5M3 6.5h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>`;
+    chip.innerHTML = `${icon}<span class="chip-name" style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${doc.name}">${doc.name}</span>${doc.isDefault?'<span style="font-size:10px;opacity:0.6">★</span>':''}<button class="chip-toggle">${attached?'✓':'+'}</button><button class="chip-remove">×</button>`;
+    chip.querySelector('.chip-toggle').addEventListener('click', e => { e.stopPropagation(); if(pdfSelectedDocIds.has(doc.id))pdfSelectedDocIds.delete(doc.id);else pdfSelectedDocIds.add(doc.id); renderPdfAttachChips(); });
+    chip.querySelector('.chip-remove').addEventListener('click', async e => { e.stopPropagation(); if(!confirm(`Remove "${doc.name}"?`))return; let docs=await getDocs(); docs=docs.filter(d=>d.id!==doc.id); pdfSelectedDocIds.delete(doc.id); await saveDocs(docs); await renderDocsList(); await renderPdfAttachChips(); });
+    content.appendChild(chip);
+  });
+}
+
+// ── Quick upload (email preview) ──────────────────────────────────────
+document.getElementById('previewAttachInput').addEventListener('change', async e => {
+  const files = Array.from(e.target.files); const newIds = [];
+  for (const file of files) {
+    if (file.size>5*1024*1024){setStatus('sendStatus',`${file.name} too large.`,'error');continue;}
+    const b64=await readFileAsBase64(file); const docs=await getDocs();
+    const id=Date.now()+'_'+Math.random().toString(36).slice(2);
+    docs.push({id,name:file.name,mime:file.type||guessMime(file.name),b64,size:file.size,isDefault:!docs.length,addedAt:new Date().toISOString()});
+    await saveDocs(docs); newIds.push(id);
+  }
+  e.target.value=''; newIds.forEach(id=>selectedDocIds.add(id));
+  await renderDocsList(); await renderSendAttachChips();
+  if(newIds.length){setStatus('sendStatus',`✓ ${newIds.length===1?files[0]?.name:newIds.length+' files'} attached.`,'success');setTimeout(()=>setStatus('sendStatus',''),2500);}
+});
+
+// ── Quick upload (PDF preview) ────────────────────────────────────────
+document.getElementById('pdfPreviewAttachInput').addEventListener('change', async e => {
+  const files = Array.from(e.target.files); const newIds = [];
+  for (const file of files) {
+    if (file.size>5*1024*1024){setStatus('pdfStatus',`${file.name} too large.`,'error');continue;}
+    const b64=await readFileAsBase64(file); const docs=await getDocs();
+    const id=Date.now()+'_'+Math.random().toString(36).slice(2);
+    docs.push({id,name:file.name,mime:file.type||guessMime(file.name),b64,size:file.size,isDefault:!docs.length,addedAt:new Date().toISOString()});
+    await saveDocs(docs); newIds.push(id);
+  }
+  e.target.value=''; newIds.forEach(id=>pdfSelectedDocIds.add(id));
+  await renderDocsList(); await renderPdfAttachChips();
+  if(newIds.length){setStatus('pdfStatus',`✓ ${newIds.length===1?files[0]?.name:newIds.length+' files'} attached.`,'success');setTimeout(()=>setStatus('pdfStatus',''),2500);}
+});
+
+// ── Gmail OAuth (web redirect flow) ──────────────────────────────────
+async function getGmailToken() {
+  const s = await getStorage(['gmailClientId','gmailToken','gmailTokenExp']);
+  if (!s.gmailClientId) throw new Error('No OAuth Client ID — add it in Settings ⚙');
+  if (s.gmailToken && s.gmailTokenExp && Date.now() < s.gmailTokenExp - 300000) return s.gmailToken;
+  // Check if we're returning from OAuth redirect
+  const hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.slice(1));
+    const token  = params.get('access_token');
+    const exp    = parseInt(params.get('expires_in') || '3600', 10);
+    if (token) {
+      await setStorage({ gmailToken: token, gmailTokenExp: Date.now() + exp * 1000 });
+      window.location.hash = '';
+      return token;
+    }
+  }
+  // Redirect to Google OAuth
+  const redirectUri = window.location.origin + window.location.pathname;
+  const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
+    client_id: s.gmailClientId,
+    redirect_uri: redirectUri,
+    response_type: 'token',
+    scope: 'https://www.googleapis.com/auth/gmail.send',
+    prompt: 'consent'
+  });
+  // Save current state so we can restore after redirect
+  sessionStorage.setItem('cla_pendingSend', JSON.stringify({ pending: true }));
+  window.location.href = authUrl;
+  throw new Error('Redirecting to Google login…');
+}
+
+// Check for OAuth token on page load
+(async () => {
+  const hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    const params = new URLSearchParams(hash.slice(1));
+    const token  = params.get('access_token');
+    const exp    = parseInt(params.get('expires_in') || '3600', 10);
+    if (token) {
+      await setStorage({ gmailToken: token, gmailTokenExp: Date.now() + exp * 1000 });
+      window.location.hash = '';
+      setStatus('sendStatus', '✓ Gmail connected! You can now send your email.', 'success');
+      setTimeout(() => setStatus('sendStatus', ''), 4000);
+    }
+  }
+})();
+
+// ── Send via Gmail ────────────────────────────────────────────────────
+document.getElementById('sendBtn').addEventListener('click', async () => {
+  const toEmail    = document.getElementById('toEmail').value.trim();
+  const subject    = document.getElementById('emailSubject').value.trim();
+  const senderName = document.getElementById('senderName').value.trim();
+  const editor     = document.getElementById('emailLetterOutput');
+  const bodyHtml   = editor.innerHTML.trim();
+  const bodyText   = editor.innerText.trim();
+  if (!toEmail)  { setStatus('sendStatus','Please enter recipient email.','error'); return; }
+  if (!subject)  { setStatus('sendStatus','Please enter a subject.','error'); return; }
+  if (!bodyText) { setStatus('sendStatus','Letter is empty.','error'); return; }
+  if (senderName) await setStorage({ senderName });
+  const docs = await getDocs();
+  const attachments = docs.filter(d => selectedDocIds.has(d.id));
+  const btn = document.getElementById('sendBtn'); btn.disabled = true;
+  setStatus('sendStatus','✦ Connecting to Gmail…','loading');
+  try {
+    const token = await getGmailToken();
+    setStatus('sendStatus','✦ Sending…','loading');
+    const fullHtml = wrapHtml(bodyHtml);
+    const raw = attachments.length
+      ? buildMimeWithAttachments(toEmail,subject,fullHtml,bodyText,attachments)
+      : buildHtmlMime(toEmail,subject,fullHtml,bodyText);
+    const bytes  = new TextEncoder().encode(raw);
+    const b64url = btoa(Array.from(bytes).map(b=>String.fromCharCode(b)).join('')).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+    const res = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{method:'POST',headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},body:JSON.stringify({raw:b64url})});
+    if (!res.ok){const e=await res.json();throw new Error(e.error?.message||'Gmail error');}
+    const names = attachments.map(a=>a.name).join(', ');
+    setStatus('sendStatus',`✓ Sent to ${toEmail}${names?' · 📎 '+names:''}`, 'success');
+  } catch(e) {
+    const m = e.message || '';
+    if (m.includes('Redirecting')) { setStatus('sendStatus', m, 'loading'); }
+    else setStatus('sendStatus', m.includes('OAuth')||m.includes('Client ID') ? m : 'Error: '+m, 'error');
+  }
+  btn.disabled = false;
+});
+
+// ── MIME builders ─────────────────────────────────────────────────────
+function wrapHtml(html){return`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;font-size:14px;line-height:1.7;color:#1a1a2e;max-width:600px;margin:0 auto;padding:20px}p{margin:0 0 10px}a{color:#2563eb}ul,ol{padding-left:20px;margin:6px 0}li{margin:2px 0}b,strong{font-weight:600}</style></head><body>${html}</body></html>`;}
+function buildHtmlMime(to,subject,html,plain){const b='alt_'+Math.random().toString(36).slice(2);return[`To: ${to}`,`Subject: ${subject}`,`MIME-Version: 1.0`,`Content-Type: multipart/alternative; boundary="${b}"`,'',`--${b}`,`Content-Type: text/plain; charset=utf-8`,`Content-Transfer-Encoding: 8bit`,'',plain,'',`--${b}`,`Content-Type: text/html; charset=utf-8`,`Content-Transfer-Encoding: 8bit`,'',html,'',`--${b}--`].join('\r\n');}
+function buildMimeWithAttachments(to,subject,html,plain,atts){const mb='mixed_'+Math.random().toString(36).slice(2),ab='alt_'+Math.random().toString(36).slice(2);const p=[`To: ${to}`,`Subject: ${subject}`,`MIME-Version: 1.0`,`Content-Type: multipart/mixed; boundary="${mb}"`,'',`--${mb}`,`Content-Type: multipart/alternative; boundary="${ab}"`,'',`--${ab}`,`Content-Type: text/plain; charset=utf-8`,`Content-Transfer-Encoding: 8bit`,'',plain,'',`--${ab}`,`Content-Type: text/html; charset=utf-8`,`Content-Transfer-Encoding: 8bit`,'',html,'',`--${ab}--`];for(const a of atts)p.push('',`--${mb}`,`Content-Type: ${a.mime}; name="${a.name}"`,`Content-Disposition: attachment; filename="${a.name}"`,`Content-Transfer-Encoding: base64`,'',a.b64.match(/.{1,76}/g).join('\r\n'));p.push('',`--${mb}--`);return p.join('\r\n');}
+</script>
+</body>
+</html>
