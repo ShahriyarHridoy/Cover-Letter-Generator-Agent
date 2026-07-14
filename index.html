@@ -77,10 +77,19 @@
     .research-log { margin-top: 8px; background: #f8f9fb; border: 1px solid #e2e5ec; border-radius: 7px; padding: 8px 10px; font-size: 11px; color: #6b7280; line-height: 1.6; }
 
     /* Toolbar */
-    .toolbar { display: flex; align-items: center; gap: 2px; padding: 5px 8px; background: #f8f9fb; border: 1px solid #e2e5ec; border-radius: 7px 7px 0 0; }
+    .toolbar { display: flex; align-items: center; gap: 2px; padding: 5px 8px; background: #f8f9fb; border: 1px solid #e2e5ec; border-radius: 7px 7px 0 0; flex-wrap: wrap; }
     .tb-btn { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: none; border: none; border-radius: 4px; cursor: pointer; color: #374151; font-size: 12px; transition: background 0.12s; }
     .tb-btn:hover { background: #e8eaf0; }
+    .tb-btn.active { background: #dbeafe; color: #2563eb; }
     .tb-divider { width: 1px; height: 14px; background: #e2e5ec; margin: 0 2px; }
+    .fs-control { display: flex; align-items: center; gap: 2px; }
+    .fs-btn { font-size: 14px; font-weight: 600; }
+    .fs-input { width: 34px; height: 22px; border: 1px solid #e2e5ec; border-radius: 4px; font-size: 11px; text-align: center; color: #374151; background: #fff; outline: none; font-family: inherit; }
+    .fs-input:focus { border-color: #2563eb; }
+    .ff-select { height: 22px; max-width: 92px; padding: 0 4px; border: 1px solid #e2e5ec; border-radius: 4px; font-size: 11px; color: #374151; background: #fff; outline: none; font-family: inherit; cursor: pointer; }
+    .ff-select:focus { border-color: #2563eb; }
+    .input-with-btn { display: flex; gap: 6px; }
+    .input-with-btn .field-input { flex: 1; }
     .link-bar { display: flex; align-items: center; gap: 6px; padding: 5px 8px; background: #eff6ff; border: 1px solid #bfdbfe; border-top: none; }
     .link-input { flex: 1; height: 26px; padding: 0 8px; border: 1px solid #bfdbfe; border-radius: 5px; font-size: 12px; outline: none; font-family: inherit; }
     .link-ok, .link-cancel { padding: 3px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; border: none; font-family: inherit; }
@@ -260,16 +269,28 @@
     <!-- Compose tab -->
     <div class="tab-pane active" id="tab-compose">
       <div class="section">
-        <label class="field-label">{company} <span class="muted">— company name</span></label>
+        <label class="field-label">Job ad link <span class="muted">(optional — auto-fills company, position &amp; description below)</span></label>
+        <div class="input-with-btn">
+          <input type="url" id="jobAdUrl" class="field-input" placeholder="Paste the job posting URL…" />
+          <button type="button" class="btn-test" id="fetchJobAdBtn">Fetch</button>
+        </div>
+        <div class="status-msg" id="jobAdStatus"></div>
+      </div>
+      <div class="section">
+        <label class="field-label">{company} <span class="muted">— company name <span id="companyOptionalHint" style="display:none">(optional if job ad link is set)</span></span></label>
         <input type="text" id="v_company" class="field-input" placeholder="e.g. Spotify" />
       </div>
       <div class="section">
-        <label class="field-label">{position} <span class="muted">— job title</span></label>
+        <label class="field-label">{position} <span class="muted">— job title <span id="positionOptionalHint" style="display:none">(optional if job ad link is set)</span></span></label>
         <input type="text" id="v_position" class="field-input" placeholder="e.g. Flutter Developer" />
       </div>
       <div class="section">
-        <label class="field-label">Job description / requirements <span class="muted">(paste key parts)</span></label>
+        <label class="field-label">Job description / requirements <span class="muted">(paste key parts, or leave blank if using a job ad link)</span></label>
         <textarea id="jobDesc" class="field-textarea" placeholder="Paste the job description or key requirements here…"></textarea>
+      </div>
+      <div class="section">
+        <label class="field-label">Instructions <span class="muted">(how you want it written — optional)</span></label>
+        <textarea id="genInstructions" class="field-textarea" style="min-height:56px" placeholder="e.g. Keep it under 250 words, emphasize my leadership experience, avoid mentioning salary…"></textarea>
       </div>
       <div class="collapsible-section">
         <button class="collapsible-toggle" id="moreVarsToggle">
@@ -315,6 +336,13 @@
         <div class="tb-divider"></div>
         <button class="tb-btn" data-cmd="link"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
         <button class="tb-btn" data-cmd="unlink"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="2 1.5"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="2 1.5"/><path d="M2 2l9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        <div class="tb-divider"></div>
+        <select class="ff-select" data-editor="emailTemplate" title="Font family"><option value="">Font</option></select>
+        <div class="fs-control">
+          <button class="tb-btn fs-btn" data-editor="emailTemplate" data-fs="dec" title="Decrease font size">−</button>
+          <input type="number" class="fs-input" data-editor="emailTemplate" value="13" min="6" max="96" title="Font size (px)" />
+          <button class="tb-btn fs-btn" data-editor="emailTemplate" data-fs="inc" title="Increase font size">+</button>
+        </div>
       </div>
       <div id="emailTplLinkBar" class="link-bar" style="display:none"><input type="url" id="emailTplLinkUrl" class="link-input" placeholder="https://example.com" /><button class="link-ok">Apply</button><button class="link-cancel">✕</button></div>
       <div id="emailTemplate" class="field-rich-editor" contenteditable="true" spellcheck="true"></div>
@@ -334,6 +362,13 @@
         <div class="tb-divider"></div>
         <button class="tb-btn" data-cmd="link"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
         <button class="tb-btn" data-cmd="unlink"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="2 1.5"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="2 1.5"/><path d="M2 2l9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+        <div class="tb-divider"></div>
+        <select class="ff-select" data-editor="pdfTemplate" title="Font family"><option value="">Font</option></select>
+        <div class="fs-control">
+          <button class="tb-btn fs-btn" data-editor="pdfTemplate" data-fs="dec" title="Decrease font size">−</button>
+          <input type="number" class="fs-input" data-editor="pdfTemplate" value="11" min="6" max="96" title="Font size (px)" />
+          <button class="tb-btn fs-btn" data-editor="pdfTemplate" data-fs="inc" title="Increase font size">+</button>
+        </div>
       </div>
       <div id="pdfTplLinkBar" class="link-bar" style="display:none"><input type="url" id="pdfTplLinkUrl" class="link-input" placeholder="https://example.com" /><button class="link-ok">Apply</button><button class="link-cancel">✕</button></div>
       <div id="pdfTemplate" class="field-rich-editor" contenteditable="true" spellcheck="true"></div>
@@ -385,6 +420,13 @@
           <button class="tb-btn" data-cmd="insertUnorderedList"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="2" cy="3.5" r="1.2" fill="currentColor"/><circle cx="2" cy="6.5" r="1.2" fill="currentColor"/><circle cx="2" cy="9.5" r="1.2" fill="currentColor"/><path d="M5 3.5h7M5 6.5h7M5 9.5h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
           <div class="tb-divider"></div>
           <button class="tb-btn" id="bodyLinkBtn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+          <div class="tb-divider"></div>
+          <select class="ff-select" data-editor="emailLetterOutput" title="Font family"><option value="">Font</option></select>
+          <div class="fs-control">
+            <button class="tb-btn fs-btn" data-editor="emailLetterOutput" data-fs="dec" title="Decrease font size">−</button>
+            <input type="number" class="fs-input" data-editor="emailLetterOutput" value="12" min="6" max="96" title="Font size (px)" />
+            <button class="tb-btn fs-btn" data-editor="emailLetterOutput" data-fs="inc" title="Increase font size">+</button>
+          </div>
         </div>
         <div id="bodyLinkBar" class="link-bar" style="display:none"><input type="url" id="bodyLinkUrl" class="link-input" placeholder="https://example.com" /><button class="link-ok" id="bodyLinkOk">Apply</button><button class="link-cancel" id="bodyLinkCancel">✕</button></div>
         <div id="emailLetterOutput" class="letter-editor" contenteditable="true" spellcheck="true"></div>
@@ -438,6 +480,23 @@
     </div>
     <div class="dual-panels">
       <div class="dual-pane your-pane">
+        <div class="toolbar body-toolbar" id="pdfBodyToolbar">
+          <button class="tb-btn" data-cmd="bold"><b>B</b></button>
+          <button class="tb-btn" data-cmd="italic"><i>I</i></button>
+          <button class="tb-btn" data-cmd="underline"><u>U</u></button>
+          <div class="tb-divider"></div>
+          <button class="tb-btn" data-cmd="insertUnorderedList"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="2" cy="3.5" r="1.2" fill="currentColor"/><circle cx="2" cy="6.5" r="1.2" fill="currentColor"/><circle cx="2" cy="9.5" r="1.2" fill="currentColor"/><path d="M5 3.5h7M5 6.5h7M5 9.5h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+          <div class="tb-divider"></div>
+          <button class="tb-btn" id="pdfLinkBtn"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M5.5 7.5a3 3 0 004.24 0l1.5-1.5a3 3 0 00-4.24-4.24L5.75 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M7.5 5.5a3 3 0 00-4.24 0L1.76 7a3 3 0 004.24 4.24L7.25 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></button>
+          <div class="tb-divider"></div>
+          <select class="ff-select" data-editor="pdfPreview" title="Font family"><option value="">Font</option></select>
+          <div class="fs-control">
+            <button class="tb-btn fs-btn" data-editor="pdfPreview" data-fs="dec" title="Decrease font size">−</button>
+            <input type="number" class="fs-input" data-editor="pdfPreview" value="11" min="6" max="96" title="Font size (px)" />
+            <button class="tb-btn fs-btn" data-editor="pdfPreview" data-fs="inc" title="Increase font size">+</button>
+          </div>
+        </div>
+        <div id="pdfLinkBar" class="link-bar" style="display:none"><input type="url" id="pdfLinkUrl" class="link-input" placeholder="https://example.com" /><button class="link-ok" id="pdfLinkOk">Apply</button><button class="link-cancel" id="pdfLinkCancel">✕</button></div>
         <div id="pdfPreview" class="pdf-preview" contenteditable="true" spellcheck="true"></div>
         <div class="attach-section">
           <div class="attach-header">
@@ -648,10 +707,66 @@ document.getElementById('settingsToggle').addEventListener('click', () => {
     if (el && data['v_' + k]) el.value = data['v_' + k];
   });
   if (data.jobDesc) document.getElementById('jobDesc').value = data.jobDesc;
+  if (data.genInstructions) document.getElementById('genInstructions').value = data.genInstructions;
+  if (data.jobAdUrl) document.getElementById('jobAdUrl').value = data.jobAdUrl;
+  updateJobAdOptionalHints();
   document.getElementById('emailTemplate').innerHTML = data.emailTemplate || DEFAULT_EMAIL_TEMPLATE;
   document.getElementById('pdfTemplate').innerHTML   = data.pdfTemplate   || DEFAULT_PDF_TEMPLATE;
   renderDocsList();
 })();
+
+// ── Job ad link → auto-fill company/position/description ──────────────
+function updateJobAdOptionalHints() {
+  const hasUrl = !!document.getElementById('jobAdUrl').value.trim();
+  document.getElementById('companyOptionalHint').style.display  = hasUrl ? 'inline' : 'none';
+  document.getElementById('positionOptionalHint').style.display = hasUrl ? 'inline' : 'none';
+}
+document.getElementById('jobAdUrl').addEventListener('input', updateJobAdOptionalHints);
+
+// Web apps can't fetch arbitrary third-party pages directly (CORS), so we
+// route through a free public CORS proxy — no backend of our own needed.
+async function fetchViaCorsProxy(url) {
+  const proxied = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+  const res = await fetch(proxied);
+  if (!res.ok) throw new Error(`Could not fetch that page (HTTP ${res.status})`);
+  return res.text();
+}
+
+async function extractJobAdDetails(apiKey, url) {
+  const html = await fetchViaCorsProxy(url);
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  doc.querySelectorAll('script,style,noscript,svg,nav,footer').forEach(el => el.remove());
+  const pageText = (doc.body?.innerText || '').replace(/\n{3,}/g, '\n\n').trim().slice(0, 8000);
+  if (!pageText) throw new Error('Could not read any text from that page');
+
+  const systemPrompt = `You extract structured job posting details from raw webpage text. Return ONLY valid JSON, no markdown formatting, no explanation, in this exact shape: {"company":"","position":"","description":""}. "description" should be the key requirements/responsibilities in plain text (a few short paragraphs or bullet points), not the entire page. If a field can't be determined, use an empty string for it.`;
+  const userPrompt = `Extract the company name, job title/position, and a concise job description (requirements + responsibilities) from this job posting page text:\n\n${pageText}`;
+  const raw = await callGroq(apiKey, 'llama-3.3-70b-versatile', userPrompt, systemPrompt);
+  const cleaned = raw.trim().replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```\s*$/, '');
+  return JSON.parse(cleaned);
+}
+
+document.getElementById('fetchJobAdBtn').addEventListener('click', async () => {
+  const url = document.getElementById('jobAdUrl').value.trim();
+  if (!url) { setStatus('jobAdStatus', 'Paste a job posting URL first.', 'error'); return; }
+  const data = await getStorage(['groqApiKey']);
+  if (!data.groqApiKey) { setStatus('jobAdStatus', 'Add your Groq API key in Settings ⚙ first.', 'error'); return; }
+  const btn = document.getElementById('fetchJobAdBtn');
+  btn.disabled = true;
+  setStatus('jobAdStatus', '🔗 Fetching job posting…', 'loading');
+  try {
+    setStatus('jobAdStatus', '✦ Extracting job details…', 'loading');
+    const extracted = await extractJobAdDetails(data.groqApiKey, url);
+    if (extracted.company)     document.getElementById('v_company').value  = extracted.company;
+    if (extracted.position)    document.getElementById('v_position').value = extracted.position;
+    if (extracted.description) document.getElementById('jobDesc').value    = extracted.description;
+    setStatus('jobAdStatus', '✓ Filled in company, position & description — review before generating.', 'success');
+    setTimeout(() => setStatus('jobAdStatus', ''), 4000);
+  } catch (e) {
+    setStatus('jobAdStatus', 'Error: ' + e.message, 'error');
+  }
+  btn.disabled = false;
+});
 
 // ── Serper test button ────────────────────────────────────────────────
 document.getElementById('testSerperBtn').addEventListener('click', async () => {
@@ -725,18 +840,38 @@ async function callGroq(apiKey, model, userMsg, systemMsg = '') {
 
 // ── MAIN: Research & Generate ─────────────────────────────────────────
 document.getElementById('goBtn').addEventListener('click', async () => {
-  const vars    = getVars();
-  const jobDesc = document.getElementById('jobDesc').value.trim();
-  if (!vars.company)  { setStatus('composeStatus','Please enter the company name.','error'); return; }
-  if (!vars.position) { setStatus('composeStatus','Please enter the job title.','error'); return; }
+  let vars    = getVars();
+  let jobDesc = document.getElementById('jobDesc').value.trim();
+  const genInstructions = document.getElementById('genInstructions').value.trim();
+  const jobAdUrl = document.getElementById('jobAdUrl').value.trim();
 
   const data = await getStorage(['groqApiKey','serperApiKey','emailTemplate','pdfTemplate','subjectTpl','senderName']);
   if (!data.groqApiKey) { setStatus('composeStatus','Add your Groq API key in Settings ⚙','error'); return; }
 
+  // Company/position/description are optional as long as a job ad link is
+  // provided — auto-extract from it here if any of those fields are blank.
+  if (jobAdUrl && (!vars.company || !vars.position || !jobDesc)) {
+    setStatus('composeStatus', '🔗 Reading job ad link…', 'loading');
+    try {
+      const extracted = await extractJobAdDetails(data.groqApiKey, jobAdUrl);
+      if (!vars.company && extracted.company)   document.getElementById('v_company').value  = extracted.company;
+      if (!vars.position && extracted.position) document.getElementById('v_position').value = extracted.position;
+      if (!jobDesc && extracted.description)    document.getElementById('jobDesc').value     = extracted.description;
+      vars    = getVars();
+      jobDesc = document.getElementById('jobDesc').value.trim();
+    } catch (e) {
+      setStatus('composeStatus', 'Could not read the job ad link: ' + e.message, 'error');
+      return;
+    }
+  }
+
+  if (!vars.company)  { setStatus('composeStatus','Please enter the company name (or a job ad link).','error'); return; }
+  if (!vars.position) { setStatus('composeStatus','Please enter the job title (or a job ad link).','error'); return; }
+
   await setStorage({
     v_company:vars.company, v_position:vars.position, v_senderName:vars.senderName,
     v_email:vars.email, v_phone:vars.phone, v_custom1:vars.custom1,
-    jobDesc, senderName: vars.senderName
+    jobDesc, genInstructions, jobAdUrl, senderName: vars.senderName
   });
 
   const btn = document.getElementById('goBtn');
@@ -803,12 +938,13 @@ ${researchContext || 'No live research available — use general knowledge about
 BASE TEMPLATE (use this as the foundation — keep the applicant's real background, tone, and structure, but tailor it to the specific company and role):
 ${templateText}
 
+${genInstructions ? `USER'S CUSTOM INSTRUCTIONS FOR THIS LETTER (follow these closely — they override the general guidance below where they conflict, e.g. a specific word limit or which experiences to emphasize):\n${genInstructions}\n` : ''}
 INSTRUCTIONS:
 - Keep the applicant's actual background, skills, and experience from the template — do not invent or replace them
 - Tailor the letter to ${vars.company} and the ${vars.position} role specifically
 - Replace any [placeholder] sections with relevant content based on the job description and research
 - Reference specific things about ${vars.company} from the research findings
-- Keep the same overall length and tone as the template
+- Keep the same overall length and tone as the template, unless the user's custom instructions specify otherwise
 - End with "Warm regards,\n${vars.senderName}"
 - Return ONLY the letter text, no preamble or explanation`;
 
@@ -893,22 +1029,45 @@ document.getElementById('pdfDownloadBtn').addEventListener('click', () => {
   const vars    = getVars();
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cover Letter</title>
+<style id="marginStyle">@page { size: A4; margin: 25mm 25mm 20mm 25mm; }</style>
 <style>
-@page { size: A4; margin: 25mm 25mm 20mm 25mm; }
 * { box-sizing: border-box; }
-body { font-family: 'Calibri','Trebuchet MS',Arial,sans-serif; font-size: 11pt; line-height: 1.5; color: #000; margin: 0; padding: 32px 48px; }
+body { font-family: 'Calibri','Trebuchet MS',Arial,sans-serif; font-size: 11pt; line-height: 1.5; color: #000; margin: 0; padding: 0; }
 p { margin: 0 0 8pt; } ul,ol { padding-left: 22pt; margin: 4pt 0 8pt; } li { margin: 2pt 0; }
 a { color: #000; text-decoration: none; } b,strong { font-weight: 700; }
 .pdf-header { margin-bottom: 14pt; }
 .pdf-name { font-size: 13pt; font-weight: 700; margin: 0 0 2pt !important; line-height: 1.3; }
 .pdf-contact { font-size: 9.5pt; color: #222; margin: 0 !important; line-height: 1.45; }
-.print-bar { position: fixed; top: 0; left: 0; right: 0; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; font-family: -apple-system,sans-serif; font-size: 13px; z-index: 9999; }
+.print-bar { position: fixed; top: 0; left: 0; right: 0; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; font-family: -apple-system,sans-serif; font-size: 13px; z-index: 9999; gap: 12px; }
+.print-bar span { opacity: 0.85; font-size: 12px; flex: 1; }
+.margin-control { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.margin-control label { opacity: 0.85; white-space: nowrap; }
+.margin-control input { width: 40px; height: 26px; padding: 0 6px; border: none; border-radius: 5px; font-size: 13px; text-align: center; outline: none; font-family: inherit; }
+.margin-unit { opacity: 0.7; }
 .print-btn { background: #fff; color: #1d4ed8; border: none; border-radius: 6px; padding: 7px 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.content { margin-top: 52px; }
-@media print { .print-bar { display: none !important; } .content { margin-top: 0 !important; } }
+.content { margin-top: 52px; padding: 32px 48px; }
+@media print { .print-bar { display: none !important; } .content { margin-top: 0 !important; padding: 0 !important; } }
 </style></head><body>
-<div class="print-bar"><span>✦ Ready — click Save as PDF or use Ctrl+P</span><button class="print-btn" onclick="window.print()">Save as PDF</button></div>
+<div class="print-bar">
+  <span>✦ Ready — click Save as PDF or use Ctrl+P</span>
+  <div class="margin-control">
+    <label>Top</label><input type="number" id="mT" min="0" max="50" value="25" />
+    <label>Right</label><input type="number" id="mR" min="0" max="50" value="25" />
+    <label>Bottom</label><input type="number" id="mB" min="0" max="50" value="20" />
+    <label>Left</label><input type="number" id="mL" min="0" max="50" value="25" />
+    <span class="margin-unit">mm</span>
+  </div>
+  <button class="print-btn" onclick="window.print()">Save as PDF</button>
+</div>
 <div class="content">${content}</div>
+<script>
+  const ms = document.getElementById('marginStyle');
+  const clamp = v => Math.max(0, Math.min(50, parseFloat(v) || 0));
+  function applyMargins() {
+    ms.textContent = '@page { margin: ' + clamp(document.getElementById('mT').value) + 'mm ' + clamp(document.getElementById('mR').value) + 'mm ' + clamp(document.getElementById('mB').value) + 'mm ' + clamp(document.getElementById('mL').value) + 'mm; }';
+  }
+  ['mT','mR','mB','mL'].forEach(id => document.getElementById(id).addEventListener('input', applyMargins));
+<\/script>
 </body></html>`);
   win.document.close();
   setStatus('pdfStatus','Print window opened — click "Save as PDF"','success');
@@ -961,6 +1120,148 @@ function closeLinkBar(barId, urlId, editorId) { document.getElementById(barId).s
 
 setupToolbar('emailTemplate', document.getElementById('emailTplToolbar'), 'emailTplLinkBar', 'emailTplLinkUrl');
 setupToolbar('pdfTemplate',   document.getElementById('pdfTplToolbar'),   'pdfTplLinkBar',   'pdfTplLinkUrl');
+
+// ── PDF preview body toolbar (bold/italic/underline/list/link) ─────────
+document.querySelectorAll('#pdfBodyToolbar .tb-btn[data-cmd]').forEach(btn => {
+  btn.addEventListener('mousedown', e => {
+    e.preventDefault();
+    document.getElementById('pdfPreview').focus();
+    document.execCommand(btn.dataset.cmd, false, null);
+  });
+});
+['mouseup','keyup'].forEach(ev =>
+  document.getElementById('pdfPreview').addEventListener(ev, () => saveEditorSel('pdfPreview')));
+document.getElementById('pdfLinkBtn').addEventListener('mousedown', e => {
+  e.preventDefault(); saveEditorSel('pdfPreview');
+  const existing = window.getSelection()?.anchorNode?.parentElement?.closest('a')?.href || '';
+  document.getElementById('pdfLinkUrl').value = existing;
+  document.getElementById('pdfLinkBar').style.display = 'flex';
+  document.getElementById('pdfLinkUrl').focus();
+});
+document.getElementById('pdfLinkOk').addEventListener('click', () => {
+  const url = document.getElementById('pdfLinkUrl').value.trim();
+  if (!url) { closeLinkBar('pdfLinkBar','pdfLinkUrl','pdfPreview'); return; }
+  restoreEditorSel('pdfPreview');
+  document.execCommand('createLink', false, url.startsWith('http') ? url : 'https://' + url);
+  const a = window.getSelection()?.anchorNode?.parentElement?.closest('a');
+  if (a) { a.target='_blank'; a.rel='noopener noreferrer'; }
+  closeLinkBar('pdfLinkBar','pdfLinkUrl','pdfPreview');
+});
+document.getElementById('pdfLinkCancel').addEventListener('click', () => { restoreEditorSel('pdfPreview'); closeLinkBar('pdfLinkBar','pdfLinkUrl','pdfPreview'); });
+document.getElementById('pdfLinkUrl').addEventListener('keydown', e => {
+  if (e.key==='Enter')  { e.preventDefault(); document.getElementById('pdfLinkOk').click(); }
+  if (e.key==='Escape') { restoreEditorSel('pdfPreview'); closeLinkBar('pdfLinkBar','pdfLinkUrl','pdfPreview'); }
+});
+
+// ── Font size / font family controls (all rich editors) ────────────────
+const FONT_FAMILIES = [
+  { name: 'Sans Serif', value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" },
+  { name: 'Roboto',     value: "Roboto, Arial, sans-serif" },
+  { name: 'Times',      value: "'Times New Roman', Times, serif" },
+  { name: 'Georgia',    value: "Georgia, serif" },
+  { name: 'Courier',    value: "'Courier New', Courier, monospace" },
+  { name: 'Verdana',    value: "Verdana, Geneva, sans-serif" },
+  { name: 'Calibri',    value: "Calibri, Candara, sans-serif" },
+  { name: 'Trebuchet',  value: "'Trebuchet MS', sans-serif" },
+  { name: 'Garamond',   value: "Garamond, serif" },
+];
+document.querySelectorAll('.ff-select').forEach(select => {
+  FONT_FAMILIES.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.value; opt.textContent = f.name; opt.style.fontFamily = f.value;
+    select.appendChild(opt);
+  });
+});
+
+const BLOCK_TAGS = ['P','LI','DIV','H1','H2','H3','H4','BLOCKQUOTE'];
+function getBlockAncestor(node) {
+  let el = node.nodeType === 3 ? node.parentElement : node;
+  while (el && el.tagName !== 'BODY' && BLOCK_TAGS.indexOf(el.tagName) === -1) el = el.parentElement;
+  return el;
+}
+function applyLineHeightForSize(block, px) { if (block) block.style.lineHeight = Math.round(px * 1.5) + 'px'; }
+
+function applyFontSize(editorId, px) {
+  const editor = document.getElementById(editorId);
+  editor.focus();
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return;
+  px = Math.max(6, Math.min(96, px));
+  if (sel.isCollapsed) {
+    const range = sel.getRangeAt(0);
+    const span = document.createElement('span');
+    span.style.fontSize = px + 'px';
+    span.appendChild(document.createTextNode('​'));
+    range.insertNode(span);
+    const caretRange = document.createRange();
+    caretRange.setStart(span.firstChild, 1);
+    caretRange.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(caretRange);
+    applyLineHeightForSize(getBlockAncestor(span), px);
+  } else {
+    document.execCommand('fontSize', false, '7');
+    editor.querySelectorAll('font[size="7"]').forEach(f => {
+      const span = document.createElement('span');
+      span.style.fontSize = px + 'px';
+      while (f.firstChild) span.appendChild(f.firstChild);
+      f.parentNode.replaceChild(span, f);
+      applyLineHeightForSize(getBlockAncestor(span), px);
+    });
+  }
+}
+
+function applyFontFamily(editorId, family) {
+  const editor = document.getElementById(editorId);
+  editor.focus();
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || !family) return;
+  if (sel.isCollapsed) {
+    const range = sel.getRangeAt(0);
+    const span = document.createElement('span');
+    span.style.fontFamily = family;
+    span.appendChild(document.createTextNode('​'));
+    range.insertNode(span);
+    const caretRange = document.createRange();
+    caretRange.setStart(span.firstChild, 1);
+    caretRange.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(caretRange);
+  } else {
+    document.execCommand('fontName', false, family);
+    editor.querySelectorAll(`font[face="${family}"]`).forEach(f => {
+      const span = document.createElement('span');
+      span.style.fontFamily = family;
+      while (f.firstChild) span.appendChild(f.firstChild);
+      f.parentNode.replaceChild(span, f);
+    });
+  }
+}
+
+document.querySelectorAll('.fs-btn[data-fs]').forEach(btn => {
+  btn.addEventListener('mousedown', e => {
+    e.preventDefault();
+    const editorId = btn.dataset.editor;
+    const input = document.querySelector(`.fs-input[data-editor="${editorId}"]`);
+    const cur = parseInt(input.value, 10) || 12;
+    const next = btn.dataset.fs === 'inc' ? cur + 1 : cur - 1;
+    input.value = Math.max(6, Math.min(96, next));
+    applyFontSize(editorId, next);
+  });
+});
+document.querySelectorAll('.fs-input').forEach(input => {
+  input.addEventListener('mousedown', e => e.stopPropagation());
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); applyFontSize(input.dataset.editor, parseInt(input.value,10) || 12); } });
+  input.addEventListener('change', () => applyFontSize(input.dataset.editor, parseInt(input.value,10) || 12));
+});
+document.querySelectorAll('.ff-select[data-editor]').forEach(select => {
+  select.addEventListener('mousedown', e => e.stopPropagation());
+  select.addEventListener('change', () => {
+    applyFontFamily(select.dataset.editor, select.value);
+    select.value = '';
+    select.blur();
+  });
+});
 
 // Body toolbar
 document.querySelectorAll('.body-toolbar .tb-btn[data-cmd]').forEach(btn => {
